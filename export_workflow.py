@@ -1,5 +1,6 @@
 import os
 import json
+from log import logger
 
 from load_packages import load_packages
 from update_statuses import update_kramerius_status,update_kramerius_upload_process_status,update_aleph_link
@@ -14,16 +15,22 @@ from datetime import datetime
 
 # what are we doing? We always update statuses and archive uploaded stuff.
 
-DOING_UPLOADS = False
-DOING_ALEPH = False
-REDOING_ALEPH = False
-DOING_RD = True
+
+logger.info('Starting processing of all exported packages')
+
+DOING_UPLOADS = True
+DOING_ALEPH = True
+REDOING_ALEPH = True
+DOING_RD = False
+REDOING_RD = False
 
 
 
-sysnos_to_upload = []
+
+sysnos_to_upload = ['000635710']
 urns_to_upload = []
 uuids_to_upload = []
+RD_batches_to_redo = []
 
 
 def timestamp_now():
@@ -110,7 +117,7 @@ for urn in cl_list:
                     digi_info['aleph_batch'] = aleph_lines_file_name
 
         if DOING_RD:
-            if digi_info['aleph'] and not digi_info.get('RD_h_batch'):
+            if digi_info['aleph'] and (not digi_info.get('RD_h_batch') or (REDOING_RD and digi_info.get('RD_h_batch') in RD_batches_to_redo)):
                 print(f'I think we should send this one up to RD. FMT : {digi_info["FMT"]}')
                 if digi_info["FMT"] != 'SE':
                     fin = digi_info.get('fin', '')

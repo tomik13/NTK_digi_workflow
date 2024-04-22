@@ -2,11 +2,16 @@ import os
 import re
 import json
 
+from log import logger
+
+import config
+
 from utils.aleph import aleph_dict_ids
 
 
 
 def parse_directory(path, preset = None):
+    logger.info(f'parsing the directory {path}')
     if preset:
         info = preset.copy()
     else:
@@ -100,15 +105,15 @@ def make_info_of_path(path, preset = None):
 
     return info
 
-loaded_scan_path = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/loaded_scans'
-problem_scan_path = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/problematic_scans'
+# loaded_scan_path = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/loaded_scans'
+# problem_scan_path = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/problematic_scans'
 
 def load_scan_directory(path,preset = None):
     digi_info = make_info_of_path(path, preset)
     if not digi_info['problems']:
-        new_dir = os.path.join(loaded_scan_path,digi_info['dir_name'])
+        new_dir = os.path.join(config.loaded_scan_directory,digi_info['dir_name'])
     else:
-        new_dir = os.path.join(problem_scan_path,digi_info['dir_name'])
+        new_dir = os.path.join(config.problem_scan_directory,digi_info['dir_name'])
     os.replace(digi_info['original_dir'],new_dir)
     digi_info['current_dir'] = new_dir
 
@@ -116,11 +121,11 @@ def load_scan_directory(path,preset = None):
 
 
 
-scan_import_directory = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/new_scans'
+# scan_import_directory = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/new_scans'
 
 def load_scan_dirs():
     # udeleje seznam slozek v importnim adresari
-    dirs = os.listdir(scan_import_directory)
+    dirs = os.listdir(config.scan_input_directory)
     print(dirs)
     profiles = [d for d in dirs if 'profile_' in d]
     scan_dirs = [d for d in dirs if not 'profile_' in d]
@@ -129,10 +134,10 @@ def load_scan_dirs():
 
 
     for dir in scan_dirs:
-        control_list.append(load_scan_directory(os.path.join(scan_import_directory,dir)))
+        control_list.append(load_scan_directory(os.path.join(config.scan_import_directory,dir)))
 
     for profile in profiles:
-        profile_path = os.path.join(scan_import_directory,profile)
+        profile_path = os.path.join(config.scan_import_directory,profile)
         preset_path = os.path.join(profile_path,'preset.json')
         if os.path.exists(preset_path):
             with open(preset_path,'rt') as f:

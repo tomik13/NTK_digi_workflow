@@ -6,6 +6,9 @@ from utils.kramerius import check_uuid_inK5,check_upload_process_state
 from utils.NDK_mets import mine_mets
 from update_statuses import update_aleph_link
 
+import config
+
+
 with open('/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/data/NTK_001-SYSNO_fix', 'rt') as f:
     fix001 = json.load(f)
 
@@ -32,8 +35,8 @@ def update_kramerius_upload_process_status(digi_info):
     if digi_info['upload_state'] == 'BATCH_FINISHED':
         digi_info['kramerius'] = True
 
-import_directory = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/new_exports/'
-loaded_directory = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/loaded/'
+# import_directory = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/new_exports/'
+# loaded_directory = '/mnt/moon/DIGITALIZACE/WORKFLOW_TEST/loaded/'
 
 def load_package(path):
     pkg = mine_mets(os.path.join(path))
@@ -58,7 +61,7 @@ def load_package(path):
     root001 = pkg[pkg['root']]['rec_sysno'][0]
     rootsysno = fix001[root001] if root001 in fix001 else root001
 
-    newpath = os.path.join(loaded_directory,urn)
+    newpath = os.path.join(config.NDK_loaded_directory,urn)
     os.replace(path,newpath)
 
     digi_info = {
@@ -85,13 +88,13 @@ def load_package(path):
 
 def load_packages():
     # udeleje seznam slozek v importnim adresari
-    package_list = os.listdir(import_directory)
+    package_list = os.listdir(config.NDK_input_directory)
     print(package_list)
 
     control_dict = {}
 
     for urn in package_list:
-        control_dict[urn] = load_package(os.path.join(import_directory,urn))
+        control_dict[urn] = load_package(os.path.join(config.NDK_input_directory,urn))
 
     return control_dict
 
